@@ -1,20 +1,19 @@
-// src/hooks/useProducts.js
-import { useEffect, useState, useCallback } from 'react';
-import { getProducts } from '../data/api';
+import { useEffect, useState, useCallback } from "react";
+import { getProducts } from "../data/api";
 
 export function useProducts() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (searchTerm = "") => {
     try {
       setLoading(true);
-      setError('');
-      const data = await getProducts();
+      setError("");
+      const data = await getProducts(searchTerm);
       setItems(data);
     } catch (e) {
-      setError(e.message || 'Falha ao carregar produtos');
+      setError(e.message || "Falha ao carregar produtos");
     } finally {
       setLoading(false);
     }
@@ -24,5 +23,5 @@ export function useProducts() {
     load();
   }, [load]);
 
-  return { items, loading, error, reload: load };
+  return { items, loading, error, reload: load, search: load };
 }

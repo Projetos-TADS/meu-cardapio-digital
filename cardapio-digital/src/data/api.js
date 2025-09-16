@@ -1,5 +1,4 @@
-// src/data/api.js
-import { API_URL } from './config';
+import { API_URL } from "./config";
 
 async function fetchWithTimeout(resource, { timeout = 8000, ...options } = {}) {
   const controller = new AbortController();
@@ -13,9 +12,13 @@ async function fetchWithTimeout(resource, { timeout = 8000, ...options } = {}) {
   }
 }
 
-export async function getProducts() {
+export async function getProducts(searchTerm = "") {
   try {
-    const res = await fetchWithTimeout(`${API_URL}/products`, { timeout: 8000 });
+    const url = new URL(`${API_URL}/products`);
+    if (searchTerm) {
+      url.searchParams.append("name", searchTerm);
+    }
+    const res = await fetchWithTimeout(url.toString(), { timeout: 8000 });
     const json = await res.json().catch(() => ({}));
 
     if (!res.ok || !json?.success) {
@@ -23,11 +26,11 @@ export async function getProducts() {
       throw new Error(msg);
     }
 
-    return json.data; // array de produtos
+    return json.data;
   } catch (err) {
-    console.error('[getProducts] Falha ao buscar produtos:', err);
-    throw err.name === 'AbortError'
-      ? new Error('Tempo de conexão excedido. Verifique a rede/URL da API.')
+    console.error("[getProducts] Falha ao buscar produtos:", err);
+    throw err.name === "AbortError"
+      ? new Error("Tempo de conexão excedido. Verifique a rede/URL da API.")
       : err;
   }
 }

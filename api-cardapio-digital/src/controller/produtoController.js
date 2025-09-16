@@ -1,23 +1,35 @@
-import DataService from '../services/DataService.js';
-import Product from '../models/produtoModel.js';
-import { isPositiveInt, normalizeSku, validateNewProductPayload, validateUpdateProductPayload } from '../utils/validators.js';
+import DataService from "../services/DataService.js";
+import Product from "../models/produtoModel.js";
+import {
+  isPositiveInt,
+  normalizeSku,
+  validateNewProductPayload,
+  validateUpdateProductPayload,
+} from "../utils/validators.js";
 
 const dataService = new DataService();
 
-/** GET /products */
 export const getAllProducts = async (req, res) => {
   const products = await dataService.readAll();
+  const { name } = req.query;
+
+  if (name) {
+    const filteredProducts = products.filter((p) =>
+      p.name.toLowerCase().includes(name.toLowerCase())
+    );
+    return res.json({ success: true, data: filteredProducts });
+  }
+
   return res.json({ success: true, data: products });
 };
 
-/** GET /products/:id */
 export const getProductById = async (req, res) => {
   const id = Number(req.params.id);
 
   if (!isPositiveInt(id)) {
     return res.status(400).json({
       success: false,
-      message: 'ID inválido. Use um inteiro positivo.',
+      message: "ID inválido. Use um inteiro positivo.",
     });
   }
 
@@ -27,38 +39,35 @@ export const getProductById = async (req, res) => {
   if (!found) {
     return res.status(404).json({
       success: false,
-      message: 'Produto não encontrado.',
+      message: "Produto não encontrado.",
     });
   }
 
   return res.json({ success: true, data: found });
 };
 
-/** POST /products */
 export const createProduct = async (req, res) => {
   const errors = validateNewProductPayload(req.body);
   if (errors.length) {
-    return res.status(400).json({ success: false, message: 'Payload inválido.', errors });
+    return res.status(400).json({ success: false, message: "Payload inválido.", errors });
   }
 
   const products = await dataService.readAll();
-  const id = Number(req.body.id);
   const skuNorm = normalizeSku(req.body.sku);
 
-  // Regras de negócio
-  if (products.some((p) => p.id === id)) {
-    return res.status(409).json({ success: false, message: 'Já existe produto com este ID.' });
-  }
   if (products.some((p) => normalizeSku(p.sku) === skuNorm)) {
-    return res.status(409).json({ success: false, message: 'Já existe produto com este SKU.' });
+    return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
   }
 
+  const lastId = products.reduce((maxId, product) => Math.max(product.id, maxId), 0);
+  const newId = lastId + 1;
+
   const newProduct = new Product({
-    id,
+    id: newId,
     name: req.body.name,
     price: req.body.price,
     sku: skuNorm,
-    description: req.body.description || '',
+    description: req.body.description || "",
   });
 
   products.push(newProduct);
@@ -66,37 +75,37 @@ export const createProduct = async (req, res) => {
 
   return res.status(201).json({
     success: true,
-    message: 'Produto criado com sucesso.',
+    message: "Produto criado com sucesso.",
     data: newProduct,
   });
 };
 
-/** PUT /products/:id */
 export const updateProduct = async (req, res) => {
   const id = Number(req.params.id);
   if (!isPositiveInt(id)) {
-    return res.status(400).json({ success: false, message: 'ID inválido. Use um inteiro positivo.' });
+    return res
+      .status(400)
+      .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
   }
 
   const payloadErrors = validateUpdateProductPayload(req.body);
   if (payloadErrors.length) {
-    return res.status(400).json({ success: false, message: 'Payload inválido.', errors: payloadErrors });
+    return res
+      .status(400)
+      .json({ success: false, message: "Payload inválido.", errors: payloadErrors });
   }
 
   const products = await dataService.readAll();
   const idx = products.findIndex((p) => p.id === id);
   if (idx === -1) {
-    return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
+    return res.status(404).json({ success: false, message: "Produto não encontrado." });
   }
 
-  // Se alterar SKU, manter unicidade (case-insensitive)
   if (req.body.sku !== undefined) {
     const newSkuNorm = normalizeSku(req.body.sku);
-    const dupSku = products.some(
-      (p, i) => i !== idx && normalizeSku(p.sku) === newSkuNorm
-    );
+    const dupSku = products.some((p, i) => i !== idx && normalizeSku(p.sku) === newSkuNorm);
     if (dupSku) {
-      return res.status(409).json({ success: false, message: 'Já existe produto com este SKU.' });
+      return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
     }
     products[idx].sku = newSkuNorm;
   }
@@ -107,24 +116,29 @@ export const updateProduct = async (req, res) => {
 
   await dataService.writeAll(products);
 
-  return res.json({ success: true, message: 'Produto atualizado com sucesso.', data: products[idx] });
+  return res.json({
+    success: true,
+    message: "Produto atualizado com sucesso.",
+    data: products[idx],
+  });
 };
 
-/** DELETE /products/:id */
 export const deleteProduct = async (req, res) => {
   const id = Number(req.params.id);
   if (!isPositiveInt(id)) {
-    return res.status(400).json({ success: false, message: 'ID inválido. Use um inteiro positivo.' });
+    return res
+      .status(400)
+      .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
   }
 
   const products = await dataService.readAll();
   const idx = products.findIndex((p) => p.id === id);
   if (idx === -1) {
-    return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
+    return res.status(404).json({ success: false, message: "Produto não encontrado." });
   }
 
   const removed = products.splice(idx, 1)[0];
   await dataService.writeAll(products);
 
-  return res.json({ success: true, message: 'Produto removido com sucesso.', data: removed });
+  return res.json({ success: true, message: "Produto removido com sucesso.", data: removed });
 };
