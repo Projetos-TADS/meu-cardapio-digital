@@ -15,8 +15,10 @@ import ProductCard from "../components/ProductCard";
 
 export default function ProductsScreen() {
   const { items, loading, error, reload, search } = useProducts();
+  //Adicionado estado para o termo de busca.
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Criada função para lidar com a ação de busca.
   const handleSearch = () => {
     search(searchTerm);
   };
@@ -52,6 +54,7 @@ export default function ProductsScreen() {
         <Button title="Recarregar" onPress={() => reload()} />
       </View>
 
+      {/*   Adicionado o container de pesquisa com TextInput e Button. */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}

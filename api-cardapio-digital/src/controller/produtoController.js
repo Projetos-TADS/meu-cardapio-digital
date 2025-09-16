@@ -11,6 +11,7 @@ const dataService = new DataService();
 
 export const getAllProducts = async (req, res) => {
   const products = await dataService.readAll();
+  // Adicionado suporte para buscar produtos por nome.
   const { name } = req.query;
 
   if (name) {
@@ -58,6 +59,7 @@ export const createProduct = async (req, res) => {
   if (products.some((p) => normalizeSku(p.sku) === skuNorm)) {
     return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
   }
+  // Implementado ID auto-incremental.
 
   const lastId = products.reduce((maxId, product) => Math.max(product.id, maxId), 0);
   const newId = lastId + 1;

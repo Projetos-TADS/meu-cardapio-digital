@@ -15,6 +15,7 @@ async function fetchWithTimeout(resource, { timeout = 8000, ...options } = {}) {
 export async function getProducts(searchTerm = "") {
   try {
     const url = new URL(`${API_URL}/products`);
+    //Adicionado parâmetro de busca à URL.
     if (searchTerm) {
       url.searchParams.append("name", searchTerm);
     }

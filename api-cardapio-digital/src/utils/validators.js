@@ -7,6 +7,7 @@ export const normalizeSku = (sku) =>
 
 export const validateNewProductPayload = (body) => {
   const errors = [];
+  // A validação de 'id' foi removida desta função.
 
   if (!body.name || String(body.name).trim().length === 0) errors.push("name é obrigatório.");
   if (body.price === undefined || isNaN(Number(body.price)))

@@ -5,6 +5,7 @@ export function useProducts() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  //A função 'load' agora aceita um 'searchTerm'.
 
   const load = useCallback(async (searchTerm = "") => {
     try {
@@ -22,6 +23,7 @@ export function useProducts() {
   useEffect(() => {
     load();
   }, [load]);
+  // Retornando 'search: load'.
 
   return { items, loading, error, reload: load, search: load };
 }
