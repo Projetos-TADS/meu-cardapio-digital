@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "id": "1",
+    "sku": "ENT001",
+    "name": "Coxinha de Frango",
+    "price": 8.5,
+    "description": "Porção com 6 unidades.",
+    "imagem_url": "https://i.imgur.com/8B2wS1j.jpg",
+    "descricao_detalhada": "Massa de batata cremosa recheada com frango desfiado e temperos frescos, frita até dourar. Acompanha molho da casa.",
+    "alergenicos": ["Glúten", "Lactose"],
+    "categoria_id": "1"
+  },
+  {
+    "id": "2",
+    "sku": "ENT002",
+    "name": "Pastel de Queijo",
+    "price": 7.0,
+    "description": "Porção com 4 unidades.",
+    "imagem_url": "https://i.imgur.com/mAmT2qw.jpg",
+    "descricao_detalhada": "Pastel crocante recheado com uma generosa porção de queijo minas frescal. Frito na hora.",
+    "alergenicos": ["Glúten", "Lactose"],
+    "categoria_id": "1"
+  },
+  {
+    "id": "3",
+    "sku": "PRI001",
+    "name": "Picanha na Chapa",
+    "price": 89.9,
+    "description": "Serve 2 pessoas.",
+    "imagem_url": "https://i.imgur.com/klYD72R.jpg",
+    "descricao_detalhada": "350g de picanha nobre fatiada, grelhada na chapa com manteiga de garrafa. Acompanha arroz, farofa de ovos e vinagrete.",
+    "alergenicos": [],
+    "categoria_id": "2"
+  },
+  {
+    "id": "4",
+    "sku": "PRI002",
+    "name": "Salmão Grelhado",
+    "price": 65.0,
+    "description": "Prato individual.",
+    "imagem_url": "https://i.imgur.com/O1xQY8p.jpg",
+    "descricao_detalhada": "Posta de salmão fresco grelhado, servido com purê de mandioquinha e legumes salteados no azeite.",
+    "alergenicos": ["Peixe"],
+    "categoria_id": "2"
+  },
+  {
+    "id": "5",
+    "sku": "SOB001",
+    "name": "Torta de Limão",
+    "price": 15.0,
+    "description": "Fatia generosa.",
+    "imagem_url": "https://i.imgur.com/8h3h1mN.jpg",
+    "descricao_detalhada": "Deliciosa torta com base de biscoito, creme de limão azedinho na medida certa e cobertura de merengue suíço maçaricado.",
+    "alergenicos": ["Glúten", "Lactose", "Ovos"],
+    "categoria_id": "3"
+  },
+  {
+    "id": "6",
+    "sku": "SOB002",
+    "name": "Pudim de Leite",
+    "price": 12.0,
+    "description": "Clássico da casa.",
+    "imagem_url": "https://i.imgur.com/nJhPb0D.jpg",
+    "descricao_detalhada": "Pudim de leite condensado cremoso e sem furinhos, com uma calda de caramelo perfeita.",
+    "alergenicos": ["Lactose", "Ovos"],
+    "categoria_id": "3"
+  },
+  {
+    "id": "7",
+    "sku": "BEB001",
+    "name": "Caipirinha de Limão",
+    "price": 18.0,
+    "description": "Feita com cachaça artesanal.",
+    "imagem_url": "https://i.imgur.com/k6lq4kH.jpg",
+    "descricao_detalhada": "A clássica caipirinha brasileira, preparada com cachaça de qualidade, limão taiti fresco, açúcar e gelo.",
+    "alergenicos": [],
+    "categoria_id": "4"
+  },
+  {
+    "id": "8",
+    "sku": "BEB002",
+    "name": "Suco de Laranja Natural",
+    "price": 9.0,
+    "description": "500ml, feito na hora.",
+    "imagem_url": "https://i.imgur.com/dScV32w.jpg",
+    "descricao_detalhada": "Suco feito com laranjas frescas espremidas na hora, sem adição de água ou açúcar.",
+    "alergenicos": [],
+    "categoria_id": "4"
+  },
+  {
+    "id": "9",
+    "sku": "PIZ001",
+    "name": "Pizza de Calabresa",
+    "price": 45.0,
+    "description": "8 fatias, borda tradicional.",
+    "imagem_url": "https://i.imgur.com/GSmZd3T.jpg",
+    "descricao_detalhada": "Massa de fermentação natural, molho de tomate artesanal, queijo mussarela, fatias de calabresa e azeitonas pretas.",
+    "alergenicos": ["Glúten", "Lactose"],
+    "categoria_id": "5"
+  }
+]

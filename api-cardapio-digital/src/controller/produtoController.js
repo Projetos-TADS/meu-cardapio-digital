@@ -9,19 +9,19 @@ import {
 
 const dataService = new DataService();
 
-export const getAllProducts = async (req, res) => {
-  const products = await dataService.readAll();
-  // Adicionado suporte para buscar produtos por nome.
-  const { name } = req.query;
+export const getAllProducts = (req, res) => {
+  try {
+    let products = DataService.loadProducts();
+    const { categoria_id } = req.query;
 
-  if (name) {
-    const filteredProducts = products.filter((p) =>
-      p.name.toLowerCase().includes(name.toLowerCase())
-    );
-    return res.json({ success: true, data: filteredProducts });
+    if (categoria_id) {
+      products = products.filter((p) => p.categoria_id === categoria_id);
+    }
+
+    res.json(products);
+  } catch (error) {
+    res.status(500).send("Erro ao carregar produtos.");
   }
-
-  return res.json({ success: true, data: products });
 };
 
 export const getProductById = async (req, res) => {

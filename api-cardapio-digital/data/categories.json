@@ -1,0 +1,27 @@
+[
+  {
+    "id": "1",
+    "nome": "Entradas",
+    "imagem_url": "https://i.imgur.com/T62a21S.jpg"
+  },
+  {
+    "id": "2",
+    "nome": "Pratos Principais",
+    "imagem_url": "https://i.imgur.com/klYD72R.jpg"
+  },
+  {
+    "id": "3",
+    "nome": "Sobremesas",
+    "imagem_url": "https://i.imgur.com/8h3h1mN.jpg"
+  },
+  {
+    "id": "4",
+    "nome": "Bebidas",
+    "imagem_url": "https://i.imgur.com/k6lq4kH.jpg"
+  },
+  {
+    "id": "5",
+    "nome": "Pizzas",
+    "imagem_url": "https://i.imgur.com/GSmZd3T.jpg"
+  }
+]
