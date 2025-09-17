@@ -1,10 +1,10 @@
-import { loadCategories } from "../services/DataService.js";
+import DataService from "../services/DataService.js";
 
-export const getAllCategories = (req, res) => {
+export const getAllCategories = async (req, res, next) => {
   try {
-    const categories = loadCategories();
+    const categories = await DataService.loadCategories();
     res.json(categories);
   } catch (error) {
-    res.status(500).send("Erro ao carregar categorias.");
+    next(error);
   }
 };

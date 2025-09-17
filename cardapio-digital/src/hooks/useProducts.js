@@ -1,29 +1,30 @@
 import { useEffect, useState, useCallback } from "react";
 import { getProducts } from "../data/api";
 
-export function useProducts() {
+export function useProducts(categoryId) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  //A função 'load' agora aceita um 'searchTerm'.
 
-  const load = useCallback(async (searchTerm = "") => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await getProducts(searchTerm);
-      setItems(data);
-    } catch (e) {
-      setError(e.message || "Falha ao carregar produtos");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const load = useCallback(
+    async (searchTerm = "") => {
+      try {
+        setLoading(true);
+        setError("");
+        const data = await getProducts({ categoryId, searchTerm });
+        setItems(data);
+      } catch (e) {
+        setError(e.message || "Falha ao carregar produtos");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [categoryId]
+  );
 
   useEffect(() => {
     load();
   }, [load]);
-  // Retornando 'search: load'.
 
   return { items, loading, error, reload: load, search: load };
 }

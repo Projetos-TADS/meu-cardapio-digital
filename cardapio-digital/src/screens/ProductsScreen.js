@@ -13,14 +13,17 @@ import {
 import { useProducts } from "../hooks/useProducts";
 import ProductCard from "../components/ProductCard";
 
-export default function ProductsScreen() {
-  const { items, loading, error, reload, search } = useProducts();
-  //Adicionado estado para o termo de busca.
+export default function ProductsScreen({ categoryId }) {
+  const { items, loading, error, reload, search } = useProducts(categoryId);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Criada função para lidar com a ação de busca.
   const handleSearch = () => {
     search(searchTerm);
+  };
+
+  const onReload = () => {
+    setSearchTerm("");
+    reload();
   };
 
   if (loading && items.length === 0) {
@@ -37,30 +40,20 @@ export default function ProductsScreen() {
       <SafeAreaView style={styles.containerCenter}>
         <Text style={[styles.infoText, { color: "red", textAlign: "center" }]}>{error}</Text>
         <View style={{ height: 12 }} />
-        <Button title="Tentar novamente" onPress={reload} />
-        <View style={{ height: 12 }} />
-        <Text style={styles.hint}>
-          Verifique o API_URL em <Text style={styles.code}>src/data/config.js</Text> e teste a rota{" "}
-          <Text style={styles.code}>/products</Text> no navegador do emulador/celular.
-        </Text>
+        <Button title="Tentar novamente" onPress={onReload} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Produtos</Text>
-        <Button title="Recarregar" onPress={() => reload()} />
-      </View>
-
-      {/*   Adicionado o container de pesquisa com TextInput e Button. */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Pesquisar por nome ou ID"
+          placeholder="Pesquisar..."
           value={searchTerm}
           onChangeText={setSearchTerm}
+          onSubmitEditing={handleSearch}
         />
         <Button title="Pesquisar" onPress={handleSearch} />
       </View>
@@ -78,10 +71,10 @@ export default function ProductsScreen() {
         contentContainerStyle={items.length === 0 ? styles.listEmpty : styles.list}
         ListEmptyComponent={
           <View style={{ alignItems: "center", padding: 24 }}>
-            <Text>Nenhum produto cadastrado.</Text>
+            <Text>Nenhum produto encontrado.</Text>
           </View>
         }
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={reload} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={onReload} />}
       />
     </SafeAreaView>
   );
@@ -99,19 +92,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f7f7f7",
   },
-  header: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: { fontSize: 20, fontWeight: "700" },
   list: { paddingBottom: 16 },
   listEmpty: { flexGrow: 1, justifyContent: "center" },
   infoText: { marginTop: 10, fontSize: 14 },
-  hint: { fontSize: 12, color: "#555", textAlign: "center" },
-  code: { fontFamily: "monospace" },
   bannerError: {
     marginHorizontal: 16,
     marginBottom: 8,
@@ -125,8 +108,10 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingVertical: 10,
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
   searchInput: {
     flex: 1,
@@ -136,5 +121,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginRight: 10,
     borderRadius: 8,
+    backgroundColor: "white",
   },
 });

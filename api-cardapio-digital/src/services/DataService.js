@@ -1,23 +1,46 @@
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const productsFilePath = path.join(__dirname, "..", "..", "data", "products.json");
-const categoriesFilePath = path.join(__dirname, "..", "..", "data", "categories.json");
+const dataDirectory = path.join(__dirname, "..", "..", "data");
+const productsFilePath = path.join(dataDirectory, "products.json");
+const categoriesFilePath = path.join(dataDirectory, "categories.json");
 
-export const loadProducts = () => {
-  const data = fs.readFileSync(productsFilePath, "utf8");
-  return JSON.parse(data);
-};
+class DataService {
+  async _readFile(filePath) {
+    try {
+      const data = await fs.readFile(filePath, "utf8");
+      return JSON.parse(data);
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        return [];
+      }
+      throw new Error(`Erro ao ler o arquivo: ${filePath}`);
+    }
+  }
 
-export const loadCategories = () => {
-  const data = fs.readFileSync(categoriesFilePath, "utf8");
-  return JSON.parse(data);
-};
+  async _writeFile(filePath, data) {
+    try {
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+    } catch (error) {
+      throw new Error(`Erro ao escrever no arquivo: ${filePath}`);
+    }
+  }
 
-export const saveProducts = (products) => {
-  fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2));
-};
+  loadProducts() {
+    return this._readFile(productsFilePath);
+  }
+
+  saveProducts(products) {
+    return this._writeFile(productsFilePath, products);
+  }
+
+  loadCategories() {
+    return this._readFile(categoriesFilePath);
+  }
+}
+
+export default new DataService();

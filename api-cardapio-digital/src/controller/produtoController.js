@@ -7,140 +7,154 @@ import {
   validateUpdateProductPayload,
 } from "../utils/validators.js";
 
-const dataService = new DataService();
-
-export const getAllProducts = (req, res) => {
+export const getAllProducts = async (req, res, next) => {
   try {
-    let products = DataService.loadProducts();
-    const { categoria_id } = req.query;
+    let products = await DataService.loadProducts();
+    const { categoria_id, name } = req.query;
 
     if (categoria_id) {
       products = products.filter((p) => p.categoria_id === categoria_id);
     }
 
-    res.json(products);
+    if (name) {
+      products = products.filter((p) => p.name.toLowerCase().includes(name.toLowerCase()));
+    }
+
+    res.json({ success: true, data: products });
   } catch (error) {
-    res.status(500).send("Erro ao carregar produtos.");
+    next(error);
   }
 };
 
-export const getProductById = async (req, res) => {
-  const id = Number(req.params.id);
+export const getProductById = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!isPositiveInt(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID inválido. Use um inteiro positivo.",
+      });
+    }
 
-  if (!isPositiveInt(id)) {
-    return res.status(400).json({
-      success: false,
-      message: "ID inválido. Use um inteiro positivo.",
-    });
+    const products = await DataService.loadProducts();
+    const found = products.find((p) => p.id === String(id));
+
+    if (!found) {
+      return res.status(404).json({
+        success: false,
+        message: "Produto não encontrado.",
+      });
+    }
+    return res.json({ success: true, data: found });
+  } catch (error) {
+    next(error);
   }
-
-  const products = await dataService.readAll();
-  const found = products.find((p) => p.id === id);
-
-  if (!found) {
-    return res.status(404).json({
-      success: false,
-      message: "Produto não encontrado.",
-    });
-  }
-
-  return res.json({ success: true, data: found });
 };
 
-export const createProduct = async (req, res) => {
-  const errors = validateNewProductPayload(req.body);
-  if (errors.length) {
-    return res.status(400).json({ success: false, message: "Payload inválido.", errors });
-  }
+export const createProduct = async (req, res, next) => {
+  try {
+    const errors = validateNewProductPayload(req.body);
+    if (errors.length) {
+      return res.status(400).json({ success: false, message: "Payload inválido.", errors });
+    }
 
-  const products = await dataService.readAll();
-  const skuNorm = normalizeSku(req.body.sku);
+    const products = await DataService.loadProducts();
+    const skuNorm = normalizeSku(req.body.sku);
 
-  if (products.some((p) => normalizeSku(p.sku) === skuNorm)) {
-    return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
-  }
-  // Implementado ID auto-incremental.
-
-  const lastId = products.reduce((maxId, product) => Math.max(product.id, maxId), 0);
-  const newId = lastId + 1;
-
-  const newProduct = new Product({
-    id: newId,
-    name: req.body.name,
-    price: req.body.price,
-    sku: skuNorm,
-    description: req.body.description || "",
-  });
-
-  products.push(newProduct);
-  await dataService.writeAll(products);
-
-  return res.status(201).json({
-    success: true,
-    message: "Produto criado com sucesso.",
-    data: newProduct,
-  });
-};
-
-export const updateProduct = async (req, res) => {
-  const id = Number(req.params.id);
-  if (!isPositiveInt(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
-  }
-
-  const payloadErrors = validateUpdateProductPayload(req.body);
-  if (payloadErrors.length) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Payload inválido.", errors: payloadErrors });
-  }
-
-  const products = await dataService.readAll();
-  const idx = products.findIndex((p) => p.id === id);
-  if (idx === -1) {
-    return res.status(404).json({ success: false, message: "Produto não encontrado." });
-  }
-
-  if (req.body.sku !== undefined) {
-    const newSkuNorm = normalizeSku(req.body.sku);
-    const dupSku = products.some((p, i) => i !== idx && normalizeSku(p.sku) === newSkuNorm);
-    if (dupSku) {
+    if (products.some((p) => normalizeSku(p.sku) === skuNorm)) {
       return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
     }
-    products[idx].sku = newSkuNorm;
+
+    const lastId = products.reduce((maxId, product) => Math.max(Number(product.id), maxId), 0);
+    const newId = String(lastId + 1);
+
+    const newProduct = new Product({
+      id: newId,
+      ...req.body,
+      sku: skuNorm,
+    });
+
+    products.push(newProduct);
+    await DataService.saveProducts(products);
+
+    return res.status(201).json({
+      success: true,
+      message: "Produto criado com sucesso.",
+      data: newProduct,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  if (req.body.name !== undefined) products[idx].name = String(req.body.name);
-  if (req.body.price !== undefined) products[idx].price = Number(req.body.price);
-  if (req.body.description !== undefined) products[idx].description = String(req.body.description);
-
-  await dataService.writeAll(products);
-
-  return res.json({
-    success: true,
-    message: "Produto atualizado com sucesso.",
-    data: products[idx],
-  });
 };
 
-export const deleteProduct = async (req, res) => {
-  const id = Number(req.params.id);
-  if (!isPositiveInt(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
+export const updateProduct = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    if (!isPositiveInt(Number(id))) {
+      return res
+        .status(400)
+        .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
+    }
+
+    const payloadErrors = validateUpdateProductPayload(req.body);
+    if (payloadErrors.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Payload inválido.", errors: payloadErrors });
+    }
+
+    const products = await DataService.loadProducts();
+    const idx = products.findIndex((p) => p.id === id);
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: "Produto não encontrado." });
+    }
+
+    const updatedProduct = { ...products[idx], ...req.body };
+
+    if (req.body.sku) {
+      const newSkuNorm = normalizeSku(req.body.sku);
+      const dupSku = products.some((p, i) => i !== idx && normalizeSku(p.sku) === newSkuNorm);
+      if (dupSku) {
+        return res.status(409).json({ success: false, message: "Já existe produto com este SKU." });
+      }
+      updatedProduct.sku = newSkuNorm;
+    }
+
+    products[idx] = updatedProduct;
+    await DataService.saveProducts(products);
+
+    return res.json({
+      success: true,
+      message: "Produto atualizado com sucesso.",
+      data: products[idx],
+    });
+  } catch (error) {
+    next(error);
   }
+};
 
-  const products = await dataService.readAll();
-  const idx = products.findIndex((p) => p.id === id);
-  if (idx === -1) {
-    return res.status(404).json({ success: false, message: "Produto não encontrado." });
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    if (!isPositiveInt(Number(id))) {
+      return res
+        .status(400)
+        .json({ success: false, message: "ID inválido. Use um inteiro positivo." });
+    }
+
+    const products = await DataService.loadProducts();
+    const idx = products.findIndex((p) => p.id === id);
+
+    if (idx === -1) {
+      return res.status(404).json({ success: false, message: "Produto não encontrado." });
+    }
+
+    const removed = products.splice(idx, 1);
+    await DataService.saveProducts(products);
+
+    return res.json({ success: true, message: "Produto removido com sucesso.", data: removed[0] });
+  } catch (error) {
+    next(error);
   }
-
-  const removed = products.splice(idx, 1)[0];
-  await dataService.writeAll(products);
-
-  return res.json({ success: true, message: "Produto removido com sucesso.", data: removed });
 };

@@ -12,13 +12,17 @@ async function fetchWithTimeout(resource, { timeout = 8000, ...options } = {}) {
   }
 }
 
-export async function getProducts(searchTerm = "") {
+export async function getProducts({ categoryId, searchTerm = "" }) {
   try {
     const url = new URL(`${API_URL}/products`);
-    //Adicionado parâmetro de busca à URL.
+
+    if (categoryId) {
+      url.searchParams.append("categoria_id", categoryId);
+    }
     if (searchTerm) {
       url.searchParams.append("name", searchTerm);
     }
+
     const res = await fetchWithTimeout(url.toString(), { timeout: 8000 });
     const json = await res.json().catch(() => ({}));
 
